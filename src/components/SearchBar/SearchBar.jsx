@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import {
   Header,
   SearchButton,
@@ -7,10 +8,10 @@ import {
 
 import { BiSearch } from 'react-icons/bi';
 
-export const SearchBar = ({ handekSubmit }) => {
+export const SearchBar = ({ handelSubmit }) => {
   return (
     <Header>
-      <SearchForm onSubmit={handekSubmit}>
+      <SearchForm onSubmit={handelSubmit}>
         <SearchButton type="submit">
           <BiSearch size={'2em'} />
         </SearchButton>
@@ -25,4 +26,8 @@ export const SearchBar = ({ handekSubmit }) => {
       </SearchForm>
     </Header>
   );
+};
+
+SearchBar.propTypes = {
+  handelSubmit: PropTypes.func.isRequired,
 };

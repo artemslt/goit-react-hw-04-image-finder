@@ -18,5 +18,6 @@ export async function getImgs(searchQueury, page) {
     },
   });
   console.log('response.data :>> ', response.data);
+
   return response.data;
 }

@@ -1,18 +1,31 @@
-import { GalleryItem } from 'components/GalleryItem/GalleryItem';
-import { ImageGallery } from './ImageGallery.styled';
+import PropTypes from 'prop-types';
 
-export const ImageGallary = ({ arrImgs, onClick, modalContet }) => {
+import { GalleryItem } from 'components/GalleryItem/GalleryItem';
+import { Wrapper } from './ImageGallery.styled';
+
+export const ImageGallery = ({ arrImgs, onClick, setModalId }) => {
   return (
-    <ImageGallery>
+    <Wrapper>
       {arrImgs.map(({ webformatURL, id }) => (
         <GalleryItem
           previewURL={webformatURL}
           key={id}
           onClick={onClick}
           id={id}
-          imgClick={modalContet}
+          imgClick={setModalId}
         />
       ))}
-    </ImageGallery>
+    </Wrapper>
   );
+};
+
+ImageGallery.propTypes = {
+  arrImgs: PropTypes.arrayOf(
+    PropTypes.shape({
+      webformatURL: PropTypes.string.isRequired,
+      id: PropTypes.number.isRequired,
+    })
+  ),
+  onClick: PropTypes.func.isRequired,
+  setModalId: PropTypes.func.isRequired,
 };
