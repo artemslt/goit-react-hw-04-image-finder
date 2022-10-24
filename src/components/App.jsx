@@ -64,7 +64,7 @@ export const App = () => {
     e.preventDefault();
     const searchFormValue = e.currentTarget.elements.search.value;
 
-    if (query === searchFormValue) {
+    if (query === searchFormValue || searchFormValue === '') {
       e.target.reset();
       toast.warning('Enter a new serch word, please!', {
         position: toast.POSITION.TOP_RIGHT,
