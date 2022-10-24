@@ -37,15 +37,20 @@ export const App = () => {
       setStatus(Status.PENDING);
       getImgs(query, page)
         .then(data => {
-          setImglist([...imgsList, ...data.hits]);
-          setTotalPages(Math.ceil(data.totalHits / 12));
-
           if (data.totalHits === 0) {
             notFindMessage();
           }
           if (page === 1 && data.totalHits !== 0) {
             findMessage(data.totalHits);
           }
+
+          setImglist([...imgsList, ...data.hits]);
+          setTotalPages(Math.ceil(data.totalHits / 12));
+
+          window.scrollBy({
+            top: document.documentElement.clientHeight * page,
+            behavior: 'smooth',
+          });
         })
         .catch(() => {
           setStatus(Status.REJECTED);
@@ -85,19 +90,6 @@ export const App = () => {
     setPage(page + 1);
     setStatus(Status.IDLE);
   };
-
-  function scrollPage() {
-    window.scrollBy({
-      top: document.documentElement.clientHeight,
-      behavior: 'smooth',
-    });
-  }
-
-  useEffect(() => {
-    if (page > 1) {
-      scrollPage();
-    }
-  }, [page]);
 
   return (
     <Layout>
