@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { SearchBar } from './SearchBar/SearchBar';
@@ -9,6 +9,12 @@ import { Layout } from './Layout/Layout';
 import { Loader } from './Loader/Loader';
 import { Modal } from './Modal/Modal';
 import { getImgs } from 'Api/PixabeyApi';
+import {
+  findMessage,
+  notFindMessage,
+  errorMessage,
+  noQueryMessage,
+} from './helpers/toast';
 
 const Status = {
   IDLE: 'idle',
@@ -35,30 +41,19 @@ export const App = () => {
           setTotalPages(Math.ceil(data.totalHits / 12));
 
           if (data.totalHits === 0) {
-            toast.warning("Sorry, we didn't find any matching images.", {
-              position: toast.POSITION.TOP_RIGHT,
-            });
+            notFindMessage();
           }
           if (page === 1 && data.totalHits !== 0) {
-            console.log('first', 1);
-            toast.info(`We find ${data.totalHits} images`, {
-              position: toast.POSITION.TOP_RIGHT,
-            });
+            findMessage(data.totalHits);
           }
         })
-        .catch(error => {
+        .catch(() => {
           setStatus(Status.REJECTED);
-          toast.error('Sorry samething  go wrong!', {
-            position: toast.POSITION.TOP_RIGHT,
-          });
+          errorMessage();
         })
         .finally(setStatus(Status.RESOLVED));
     }
   }, [query, status, page, imgsList, totalPages]);
-
-  const setModalId = id => {
-    setModalImgId(id);
-  };
 
   const handlQuery = e => {
     e.preventDefault();
@@ -66,9 +61,7 @@ export const App = () => {
 
     if (query === searchFormValue || searchFormValue === '') {
       e.target.reset();
-      toast.warning('Enter a new serch word, please!', {
-        position: toast.POSITION.TOP_RIGHT,
-      });
+      noQueryMessage();
       return;
     }
 
@@ -80,6 +73,10 @@ export const App = () => {
     e.target.reset();
   };
 
+  const setModalId = id => {
+    setModalImgId(id);
+  };
+
   const toggleModal = () => {
     setIsOpenModal(isOpenModal => !isOpenModal);
   };
@@ -89,11 +86,24 @@ export const App = () => {
     setStatus(Status.IDLE);
   };
 
+  function scrollPage() {
+    window.scrollBy({
+      top: document.documentElement.clientHeight,
+      behavior: 'smooth',
+    });
+  }
+
+  useEffect(() => {
+    if (page > 1) {
+      scrollPage();
+    }
+  }, [page]);
+
   return (
     <Layout>
       <SearchBar handelSubmit={handlQuery} />
       {status === Status.PENDING && <Loader isLoading={true} />}
-      {query && (
+      {status === Status.RESOLVED && (
         <ImageGallery
           onClick={toggleModal}
           arrImgs={imgsList}
