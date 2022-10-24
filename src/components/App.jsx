@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -10,112 +10,103 @@ import { Loader } from './Loader/Loader';
 import { Modal } from './Modal/Modal';
 import { getImgs } from 'Api/PixabeyApi';
 
-export class App extends Component {
-  state = {
-    imgsList: [],
-    query: '',
-    page: 1,
-    totalPages: 0,
-    modalImgId: '',
-    isOpenModal: false,
-    isLoading: false,
-  };
+const Status = {
+  IDLE: 'idle',
+  PENDING: 'pending',
+  RESOLVED: 'resolved',
+  REJECTED: 'rejected',
+};
 
-  async componentDidUpdate(prevProps, prevState) {
-    const { query, page } = this.state;
+export const App = () => {
+  const [imgsList, setImglist] = useState([]);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [modalImgId, setModalImgId] = useState('');
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [status, setStatus] = useState(Status.IDLE);
 
-    if (query !== prevState.query || page !== prevState.page) {
-      try {
-        this.setState({ isLoading: true });
-        const data = await getImgs(query, page);
-        this.setState(({ imgsList }) => ({
-          imgsList: [...imgsList, ...data.hits],
-          totalPages: Math.ceil(data.totalHits / 12),
-        }));
+  useEffect(() => {
+    if (query && status === Status.IDLE) {
+      setStatus(Status.PENDING);
+      getImgs(query, page)
+        .then(data => {
+          setImglist([...imgsList, ...data.hits]);
+          setTotalPages(Math.ceil(data.totalHits / 12));
 
-        if (data.totalHits === 0) {
-          toast.warning("Sorry, we didn't find any matching images.", {
+          if (data.totalHits === 0) {
+            toast.warning("Sorry, we didn't find any matching images.", {
+              position: toast.POSITION.TOP_RIGHT,
+            });
+          }
+          if (page === 1 && data.totalHits !== 0) {
+            console.log('first', 1);
+            toast.info(`We find ${data.totalHits} images`, {
+              position: toast.POSITION.TOP_RIGHT,
+            });
+          }
+        })
+        .catch(error => {
+          setStatus(Status.REJECTED);
+          toast.error('Sorry samething  go wrong!', {
             position: toast.POSITION.TOP_RIGHT,
           });
-        }
-        if (query !== prevState.query && data.totalHits !== 0) {
-          toast.info(`We find ${data.totalHits} images`, {
-            position: toast.POSITION.TOP_RIGHT,
-          });
-        }
-      } catch (error) {
-        toast.error('Sorry samething  go wrong!', {
-          position: toast.POSITION.TOP_RIGHT,
-        });
-      } finally {
-        this.setState({ isLoading: false });
-      }
+        })
+        .finally(setStatus(Status.RESOLVED));
     }
-  }
+  }, [query, status, page, imgsList, totalPages]);
 
-  setModalId = id => {
-    this.setState({ modalImgId: id });
+  const setModalId = id => {
+    setModalImgId(id);
   };
 
-  query = e => {
+  const handlQuery = e => {
     e.preventDefault();
     const searchFormValue = e.currentTarget.elements.search.value;
 
-    if (this.state.query === searchFormValue) {
+    if (query === searchFormValue) {
       e.target.reset();
       toast.warning('Enter a new serch word, please!', {
         position: toast.POSITION.TOP_RIGHT,
       });
       return;
     }
-    this.setState({
-      query: searchFormValue,
-      page: 1,
-      totalPages: 1,
-      imgsList: [],
-    });
+
+    setQuery(searchFormValue);
+    setPage(1);
+    setTotalPages(1);
+    setImglist([]);
+    setStatus(Status.IDLE);
     e.target.reset();
   };
 
-  handleClick = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const toggleModal = () => {
+    setIsOpenModal(isOpenModal => !isOpenModal);
   };
 
-  toggleModal = () => {
-    this.setState(({ isOpenModal }) => ({ isOpenModal: !isOpenModal }));
+  const loadMore = () => {
+    setPage(page + 1);
+    setStatus(Status.IDLE);
   };
 
-  render() {
-    const { query, imgsList, page, totalPages, isOpenModal, isLoading } =
-      this.state;
-    return (
-      <Layout>
-        <SearchBar handelSubmit={this.query} />
-        {isLoading && <Loader isLoading={isLoading} />}
-        {query && (
-          <ImageGallery
-            onClick={this.toggleModal}
-            arrImgs={imgsList}
-            setModalId={this.setModalId}
-          />
-        )}
-        {totalPages !== 0 && page !== totalPages && (
-          <LoadMoreBtn
-            title="Load more"
-            loadMore={this.handleClick}
-          ></LoadMoreBtn>
-        )}
-        {isOpenModal && (
-          <Modal
-            contentId={this.state.modalImgId}
-            list={imgsList}
-            onClick={this.toggleModal}
-          />
-        )}
-        <ToastContainer />
-      </Layout>
-    );
-  }
-}
+  return (
+    <Layout>
+      <SearchBar handelSubmit={handlQuery} />
+      {status === Status.PENDING && <Loader isLoading={true} />}
+      {query && (
+        <ImageGallery
+          onClick={toggleModal}
+          arrImgs={imgsList}
+          setModalId={setModalId}
+        />
+      )}
+      {totalPages !== 0 && page !== totalPages && (
+        <LoadMoreBtn title="Load more" loadMore={loadMore}></LoadMoreBtn>
+      )}
+      {isOpenModal && (
+        <Modal contentId={modalImgId} list={imgsList} onClick={toggleModal} />
+      )}
+      <ToastContainer />
+    </Layout>
+  );
+};
