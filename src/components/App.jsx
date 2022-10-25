@@ -46,11 +46,6 @@ export const App = () => {
 
           setImglist([...imgsList, ...data.hits]);
           setTotalPages(Math.ceil(data.totalHits / 12));
-
-          window.scrollBy({
-            top: document.documentElement.clientHeight * page,
-            behavior: 'smooth',
-          });
         })
         .catch(() => {
           setStatus(Status.REJECTED);
@@ -95,7 +90,7 @@ export const App = () => {
     <Layout>
       <SearchBar handelSubmit={handlQuery} />
       {status === Status.PENDING && <Loader isLoading={true} />}
-      {status === Status.RESOLVED && (
+      {query && (
         <ImageGallery
           onClick={toggleModal}
           arrImgs={imgsList}
