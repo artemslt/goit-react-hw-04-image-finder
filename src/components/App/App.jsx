@@ -1,20 +1,19 @@
 import { useState, useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
-import { SearchBar } from './SearchBar/SearchBar';
-import { LoadMoreBtn } from './LoadMoreButton/LoadMoreButton';
-import { ImageGallery } from './ImageGallery/ImageGallery';
-import { Layout } from './Layout/Layout';
-import { Loader } from './Loader/Loader';
-import { Modal } from './Modal/Modal';
 import { getImgs } from 'Api/PixabeyApi';
+
+import { LoadMoreBtn, Layout } from './App.styled';
+import { SearchBar } from '../SearchBar/SearchBar';
+import { ImageGallery } from '../ImageGallery/ImageGallery';
+import { Loader } from '../Loader/Loader';
+import { Modal } from '../Modal/Modal';
 import {
   findMessage,
   notFindMessage,
   errorMessage,
   noQueryMessage,
-} from './helpers/toast';
+} from '../helpers/toast';
 
 const Status = {
   IDLE: 'idle',
@@ -98,7 +97,7 @@ export const App = () => {
         />
       )}
       {totalPages !== 0 && page !== totalPages && (
-        <LoadMoreBtn title="Load more" loadMore={loadMore}></LoadMoreBtn>
+        <LoadMoreBtn onClick={loadMore}>Load more</LoadMoreBtn>
       )}
       {isOpenModal && (
         <Modal contentId={modalImgId} list={imgsList} onClick={toggleModal} />

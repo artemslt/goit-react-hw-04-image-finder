@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const LoadBtn = styled.button`
+export const LoadMoreBtn = styled.button`
   margin: 0 auto;
   padding: 8px 16px;
   border-radius: 2px;
@@ -25,4 +25,12 @@ export const LoadBtn = styled.button`
   :focus {
     background-color: #303f9f;
   }
+`;
+
+export const Layout = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: 16px;
+  padding-bottom: 24px;
+  text-align: center;
 `;
