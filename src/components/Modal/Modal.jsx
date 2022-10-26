@@ -8,21 +8,30 @@ export const Modal = ({ contentId, list, onClick }) => {
   useEffect(() => {
     const element = list.find(({ id }) => id === contentId);
     setModalUrl(element.largeImageURL);
-    const handleKeyDown = e => {
-      if (e.code === 'Escape') {
-        onClick();
-      }
-    };
+  }, [contentId, list]);
 
+  useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [list, contentId, onClick]);
+  });
+
+  const handleKeyDown = e => {
+    if (e.code === 'Escape') {
+      onClick();
+    }
+  };
+
+  const handleOverlayclick = e => {
+    if (e.target === e.currentTarget) {
+      onClick();
+    }
+  };
 
   return (
-    <Overlay>
-      <ModalContant onClick={onClick}>
+    <Overlay onClick={handleOverlayclick}>
+      <ModalContant>
         <img src={modalUrl} alt="" />
       </ModalContant>
     </Overlay>
